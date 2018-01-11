@@ -1,4 +1,4 @@
-package test;
+package modbustest;
 
 import java.util.HashMap;
 
@@ -42,8 +42,8 @@ public class App {
 	private static void detectDevice(String device) throws Exception {
 		ModbusSerialMaster master = new ModbusSerialMaster(getParameters(device));
 		master.connect();
-		//Socomec(master);
-		//KMTronic(master);
+		Socomec(master);
+		// KMTronic(master);
 		Register[] registers = master.readMultipleRegisters(4, 121, 1);
 		int VoltPhaseA = registers[0].getValue();
 		registers = master.readMultipleRegisters(4, 122, 1);
@@ -64,17 +64,8 @@ public class App {
 	}
 
 	private static void Socomec(ModbusSerialMaster master) throws ModbusException {
-		for (int i = 0; i < 2; i++) {
-			try {
-			BitVector bits = master.readCoils(1, 1);
-			if (bits.getBit(0) == true || bits.getBit(0) == false) {
-				System.out.println("SOCOMEC Detected  ");
-			}
-		}catch(Exception e) {
-			e.getMessage();
-			continue;	
-		}
-		}
+		Register[] IDvalue = master.readMultipleRegisters(50005, 1);
+		System.out.println("SOCOMEC Detected IDValue is :  " + IDvalue[0].getValue());
 	}
 
 	private static void KMTronic(ModbusSerialMaster master) {
