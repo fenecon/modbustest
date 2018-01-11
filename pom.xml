@@ -1,8 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>test</groupId>
-	<artifactId>test</artifactId>
+	<groupId>modbustest</groupId>
+	<artifactId>modbustest</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<scm>
 		<url>https://github.com/OpenEMS/openems</url>
@@ -32,19 +31,19 @@
 			<artifactId>j2mod</artifactId>
 			<version>${j2mod.version}</version>
 		</dependency>
-	</dependencies>
-
-	<build>
-		<sourceDirectory>src</sourceDirectory>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+			</dependencies>
+		
+		<build>
+			<sourceDirectory>src</sourceDirectory>
+			<plugins>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.7.0</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+				</plugin>
+			</plugins>
+		</build>
 </project>
