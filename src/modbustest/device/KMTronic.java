@@ -1,6 +1,5 @@
 package modbustest.device;
 
-import com.ghgande.j2mod.modbus.ModbusException;
 import com.ghgande.j2mod.modbus.ModbusIOException;
 import com.ghgande.j2mod.modbus.ModbusSlaveException;
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
@@ -9,6 +8,8 @@ import com.ghgande.j2mod.modbus.util.SerialParameters;
 
 public class KMTronic implements Device {
 
+	private final static int TIMEOUT = 500; 
+	
 	@Override
 	public String getName() {
 		return "FEMS Relais (KMTronic)";
@@ -19,7 +20,7 @@ public class KMTronic implements Device {
 	@Override
 	public boolean detectDevice(SerialParameters params) {
 		ModbusSerialMaster master = new ModbusSerialMaster(params);
-		master.setTimeout(500);
+		master.setTimeout(TIMEOUT);
 		try {
 			master.connect();			
 			master.readCoils(1, 0, 8);
