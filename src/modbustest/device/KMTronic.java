@@ -1,5 +1,6 @@
 package modbustest.device;
 
+import com.ghgande.j2mod.modbus.ModbusException;
 import com.ghgande.j2mod.modbus.ModbusIOException;
 import com.ghgande.j2mod.modbus.ModbusSlaveException;
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
@@ -18,23 +19,14 @@ public class KMTronic implements Device {
 	@Override
 	public boolean detectDevice(SerialParameters params) {
 		ModbusSerialMaster master = new ModbusSerialMaster(params);
-		for (int r = 0; r < 8; r++) {
-			try {
-				BitVector bits = master.readCoils(1, r, 1);
-				if (bits.getBit(0) == true) {
-					return true;
-				} else if (bits.getBit(0) == false) {
-					continue;
-				}
-			} catch (ModbusIOException ex) {
-				continue;
-			} catch (ModbusSlaveException ec) {
-				continue;
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
-			}
+		master.setTimeout(500);
+		try {
+			master.connect();			
+			master.readCoils(1, 0, 8);
+			return true;
+		} catch (Exception e) {
+			return false;
 		}
-		return false;
 	}
 
 	@Override
