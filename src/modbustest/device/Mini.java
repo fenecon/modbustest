@@ -1,126 +1,55 @@
-package modbustest;
+package modbustest.device;
 
 import java.util.HashMap;
 
-import com.fazecast.jSerialComm.SerialPort;
-import com.ghgande.j2mod.modbus.ModbusException;
-import com.ghgande.j2mod.modbus.ModbusIOException;
-import com.ghgande.j2mod.modbus.ModbusSlaveException;
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
-import com.ghgande.j2mod.modbus.util.BitVector;
 import com.ghgande.j2mod.modbus.util.SerialParameters;
 
-public class App {
-
-	public static void main(String[] args) throws Exception {
-		boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-
-		try {
-			SerialPort[] ports = SerialPort.getCommPorts();
-			if (ports != null) {
-				for (SerialPort port : ports) {
-					System.out.println(port.getSystemPortName());
-					System.out.println("        ");
-					if (isWindows) {
-						System.out.println("Trying---  : " + port.getSystemPortName());
-						detectDevice(port.getSystemPortName());
-					} else if (port.getSystemPortName().equals("ttyS0")) {
-						continue;
-					} else {
-						System.out.println("Trying---  : " + port.getSystemPortName());
-						detectDevice("/dev/" + port.getSystemPortName());
-
-					}
-				}
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	private static void detectDevice(String device) throws Exception {
-		ModbusSerialMaster master = new ModbusSerialMaster(getParameters(device));
+public class Mini extends BydMiniEs implements Device {
+	@Override
+	public boolean detectDevice(SerialParameters params) throws Exception {
+		System.out.println("IN mini");
+		ModbusSerialMaster master = new ModbusSerialMaster(params);
 		master.connect();
-		Socomec(master);
-		// KMTronic(master);
 		Register[] registers = master.readMultipleRegisters(4, 121, 1);
 		int VoltPhaseA = registers[0].getValue();
 		registers = master.readMultipleRegisters(4, 122, 1);
 		int VoltPhaseB = registers[0].getValue();
 		registers = master.readMultipleRegisters(4, 123, 1);
 		int VoltPhaseC = registers[0].getValue();
-		System.out.println("VoltPhaseA :  " + VoltPhaseA + "   " + " VoltPhaseB :  " + VoltPhaseB + "   "
-				+ " VoltPhaseC " + VoltPhaseC);
 		if (VoltPhaseA == 0 && VoltPhaseB == 0 || VoltPhaseB == 0 && VoltPhaseC == 0
 				|| VoltPhaseA == 0 && VoltPhaseC == 0) {
 
-			detectedMini(master);
-
+			return true;
 		} else {
-
-			detectedPro(master);
+			return false;
 		}
+
 	}
 
-	private static void Socomec(ModbusSerialMaster master) throws ModbusException {
-		Register[] IDvalue = master.readMultipleRegisters(50005, 1);
-		System.out.println("SOCOMEC Detected IDValue is :  " + IDvalue[0].getValue());
-	}
+	@Override
+	public void printImportantValues(SerialParameters params) throws Exception {
+		ModbusSerialMaster master = new ModbusSerialMaster(params);
+		master.connect();
+		Register[] registers = master.readMultipleRegisters(4, 121, 1);
+		int VoltPhaseA = registers[0].getValue();
+		registers = master.readMultipleRegisters(4, 122, 1);
+		int VoltPhaseB = registers[0].getValue();
+		registers = master.readMultipleRegisters(4, 123, 1);
+		int VoltPhaseC = registers[0].getValue();
+		System.out.println("FENECON MINI ------  VoltPhaseA :  " + VoltPhaseA + "   " + " VoltPhaseB :  " + VoltPhaseB
+				+ "   " + " VoltPhaseC " + VoltPhaseC);
 
-	private static void KMTronic(ModbusSerialMaster master) {
-		for (int r = 0; r < 8; r++) {
-			for (int u = 1; u < 17; u++) {
-				try {
-					BitVector bits = master.readCoils(u, r, 1);
-					if (bits.getBit(0) == true || bits.getBit(0) == false) {
-
-						System.out.println(" ----------KMTronic ----UnitID is :   " + u + "     ----------"
-								+ "For register :   " + r);
-
-					} else {
-						continue;
-					}
-				} catch (ModbusIOException ex) {
-					continue;
-				} catch (ModbusSlaveException ec) {
-					continue;
-				} catch (Exception e) {
-					System.out.println(e.getMessage());
-				}
-			}
-		}
-	}
-
-	private static void detectedMini(ModbusSerialMaster master) throws Exception {
-		System.out.println(" --------------Detected FENECON MINI ------------  ");
-		Register[] registers = master.readMultipleRegisters(4, 10143, 1);
+		registers = master.readMultipleRegisters(4, 10143, 1);
 		for (Register register : registers) {
 			System.out.println(" --------------FENECON MINI--- SOC is :    " + register + "----------");
 		}
-		ErrorMessages(master);
 	}
 
-	private static void detectedPro(ModbusSerialMaster master) throws Exception {
-		System.out.println(" --------------Detected FENECON by BYD PRO------------  ");
-		Register[] registers = master.readMultipleRegisters(4, 109, 1);
-		for (Register register : registers) {
-			System.out.println(" --------------FENECON PRO--- SOC is :    " + register + "----------");
-		}
-		ErrorMessages(master);
-	}
+	@Override
+	public void printErrors(SerialParameters params) {
 
-	private static SerialParameters getParameters(String device) {
-		SerialParameters params = new SerialParameters();
-		params.setPortName(device);
-		params.setBaudRate(9600);
-		params.setDatabits(8);
-		params.setParity("None");
-		params.setEncoding("rtu");
-		return params;
-	}
-
-	private static void ErrorMessages(ModbusSerialMaster master) throws Exception {
 		try {
 			HashMap<Integer, String[]> a = new HashMap<Integer, String[]>();
 			a.put(2011, new String[] { "Control curent overload 100%", "Control curent overload 110%",
@@ -214,6 +143,8 @@ public class App {
 			int[] ErrorRegisters = { 2011, 2012, 2013, 2111, 2112, 2113, 2211, 2212, 2213, 3007, 3008, 3207, 3208, 4808,
 					4809 };
 			for (int errorRegister : ErrorRegisters) {
+
+				ModbusSerialMaster master = new ModbusSerialMaster(params);
 				Register[] registers = master.readMultipleRegisters(4, errorRegister, 1);
 				String[] messages = a.get(errorRegister);
 				if (registers[0].getValue() == 0
@@ -276,7 +207,7 @@ public class App {
 		}
 	}
 
-	static boolean getBit(int n, int k) {
+	public boolean getBit(int n, int k) {
 		return (((n >> k) & 1) == 1 ? true : false);
 	}
 }
