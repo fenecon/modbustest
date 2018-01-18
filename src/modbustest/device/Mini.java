@@ -7,25 +7,34 @@ import com.ghgande.j2mod.modbus.procimg.Register;
 import com.ghgande.j2mod.modbus.util.SerialParameters;
 
 public class Mini extends BydMiniEs implements Device {
+	
 	@Override
-	public boolean detectDevice(SerialParameters params) throws Exception {
-		System.out.println("IN mini");
+	public String getName() {
+		return "FEMS Mini 3-3 or 3-6";
+		// TODO separate implementation for Mini 3-3 and Mini 3-6
+	}
+	
+	@Override
+	public boolean detectDevice(SerialParameters params) {
 		ModbusSerialMaster master = new ModbusSerialMaster(params);
-		master.connect();
-		Register[] registers = master.readMultipleRegisters(4, 121, 1);
-		int VoltPhaseA = registers[0].getValue();
-		registers = master.readMultipleRegisters(4, 122, 1);
-		int VoltPhaseB = registers[0].getValue();
-		registers = master.readMultipleRegisters(4, 123, 1);
-		int VoltPhaseC = registers[0].getValue();
-		if (VoltPhaseA == 0 && VoltPhaseB == 0 || VoltPhaseB == 0 && VoltPhaseC == 0
-				|| VoltPhaseA == 0 && VoltPhaseC == 0) {
-
-			return true;
-		} else {
+		try {
+			master.connect();
+			Register[] registers = master.readMultipleRegisters(4, 121, 1);
+			int VoltPhaseA = registers[0].getValue();
+			registers = master.readMultipleRegisters(4, 122, 1);
+			int VoltPhaseB = registers[0].getValue();
+			registers = master.readMultipleRegisters(4, 123, 1);
+			int VoltPhaseC = registers[0].getValue();
+			if (VoltPhaseA == 0 && VoltPhaseB == 0 || VoltPhaseB == 0 && VoltPhaseC == 0
+					|| VoltPhaseA == 0 && VoltPhaseC == 0) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
-
 	}
 
 	@Override

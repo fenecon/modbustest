@@ -27,35 +27,29 @@ public class App {
 
 			if (ports != null) {
 				for (SerialPort port : ports) {
-					System.out.println(port.getSystemPortName());
-					System.out.println("        ");
+					// get device name
+					String deviceName;
 					if (isWindows) {
-						System.out.println("Trying---  : " + port.getSystemPortName());
-						SerialParameters params = getParameters(port.getSystemPortName());
-
-						for (Device device : devices) {
-							if (device.detectDevice(params)) {
-								device.printImportantValues(params);
-								device.printErrors(params);
-							}
-							System.out.println();
-						}
+						deviceName = port.getSystemPortName();
 					} else if (port.getSystemPortName().equals("ttyS0")) {
-						continue;
+						continue; // ignore ttyS0
 					} else {
-						System.out.println("Trying---  : " + port.getSystemPortName());
+						deviceName = "/dev/" + port.getSystemPortName();
+					}
 
-						SerialParameters params = getParameters("/dev/" + port.getSystemPortName());
-
-						for (Device device : devices) {
-							System.out.println(device.detectDevice(params));
+					System.out.println("Trying [" + deviceName + "]");
+					SerialParameters params = getParameters(port.getSystemPortName());
+					for (Device device : devices) {
+						System.out.println("- Trying to find [" + device.getName() + "]");
+						if (device.detectDevice(params)) {
+							System.out.println("Found [" + device.getName() + "]");
 							device.printImportantValues(params);
 							device.printErrors(params);
 						}
+						System.out.println();
 					}
 				}
 			}
-
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
