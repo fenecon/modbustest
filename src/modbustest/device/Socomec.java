@@ -1,19 +1,23 @@
 package modbustest.device;
 
+import com.ghgande.j2mod.modbus.ModbusException;
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
-import com.ghgande.j2mod.modbus.util.SerialParameters;
 
-public class Socomec implements Device {
+public class Socomec extends ModbusRtuDevice {
+
+	public Socomec(String systemportname) {
+		super(systemportname);
+	}
 
 	@Override
 	public String getName() {
 		return "Socomec";
 	}
-	
+
 	@Override
-	public boolean detectDevice(SerialParameters params) {
-		ModbusSerialMaster master = new ModbusSerialMaster(params);
+	public boolean detectDevice() {
+		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
 		try {
 			master.connect();
 			Register[] registers = master.readMultipleRegisters(50005, 1);
@@ -29,14 +33,20 @@ public class Socomec implements Device {
 	}
 
 	@Override
-	public void printImportantValues(SerialParameters params) throws Exception {
-		ModbusSerialMaster master = new ModbusSerialMaster(params);
-		Register[] registers = master.readMultipleRegisters(50005, 1);
-		System.out.println("SOCOMEC ID is :   " + registers[0].getValue());
+	public void printImportantValues() {
+		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
+		Register[] registers;
+		try {
+			registers = master.readMultipleRegisters(50005, 1);
+			System.out.println("SOCOMEC ID is :   " + registers[0].getValue());
+		} catch (ModbusException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void printErrors(SerialParameters parems) {
+	public void printErrors() {
 		System.out.println("  ErrSoco ");
 	}
 

@@ -6,7 +6,11 @@ import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
 import com.ghgande.j2mod.modbus.util.SerialParameters;
 
-public class Pro implements Device {
+public class Pro extends ModbusRtuDevice {
+
+	public Pro(String systemportname) {
+		super(systemportname);
+	}
 
 	@Override
 	public String getName() {
@@ -14,8 +18,8 @@ public class Pro implements Device {
 	}
 
 	@Override
-	public boolean detectDevice(SerialParameters params) {
-		ModbusSerialMaster master = new ModbusSerialMaster(params);
+	public boolean detectDevice() {
+		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
 		try {
 			master.connect();
 			Register[] registers = master.readMultipleRegisters(4, 121, 1);
@@ -38,26 +42,30 @@ public class Pro implements Device {
 	}
 
 	@Override
-	public void printImportantValues(SerialParameters params) throws Exception {
-
-		ModbusSerialMaster master = new ModbusSerialMaster(params);
-		master.connect();
-		Register[] registers = master.readMultipleRegisters(4, 121, 1);
-		int VoltPhaseA = registers[0].getValue();
-		registers = master.readMultipleRegisters(4, 122, 1);
-		int VoltPhaseB = registers[0].getValue();
-		registers = master.readMultipleRegisters(4, 123, 1);
-		int VoltPhaseC = registers[0].getValue();
-		System.out.println("FENECON PRO ----- VoltPhaseA :  " + VoltPhaseA + "   " + " VoltPhaseB :  " + VoltPhaseB
-				+ "   " + " VoltPhaseC " + VoltPhaseC);
-		registers = master.readMultipleRegisters(4, 109, 1);
-		for (Register register : registers) {
-			System.out.println(" --------------FENECON PRO--- SOC is :    " + register + "----------");
+	public void printImportantValues() {
+		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
+		try {
+			master.connect();
+			Register[] registers = master.readMultipleRegisters(4, 121, 1);
+			int VoltPhaseA = registers[0].getValue();
+			registers = master.readMultipleRegisters(4, 122, 1);
+			int VoltPhaseB = registers[0].getValue();
+			registers = master.readMultipleRegisters(4, 123, 1);
+			int VoltPhaseC = registers[0].getValue();
+			System.out.println("FENECON PRO ----- VoltPhaseA :  " + VoltPhaseA + "   " + " VoltPhaseB :  " + VoltPhaseB
+					+ "   " + " VoltPhaseC " + VoltPhaseC);
+			registers = master.readMultipleRegisters(4, 109, 1);
+			for (Register register : registers) {
+				System.out.println(" --------------FENECON PRO--- SOC is :    " + register + "----------");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void printErrors(SerialParameters params) {
+	public void printErrors() {
 		try {
 			HashMap<Integer, String[]> a = new HashMap<Integer, String[]>();
 			a.put(2011, new String[] { "Control curent overload 100%", "Control curent overload 110%",
@@ -151,7 +159,7 @@ public class Pro implements Device {
 			int[] ErrorRegisters = { 2011, 2012, 2013, 2111, 2112, 2113, 2211, 2212, 2213, 3007, 3008, 3207, 3208, 4808,
 					4809 };
 			for (int errorRegister : ErrorRegisters) {
-				ModbusSerialMaster master = new ModbusSerialMaster(params);
+				ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
 				Register[] registers = master.readMultipleRegisters(4, errorRegister, 1);
 				String[] messages = a.get(errorRegister);
 				if (registers[0].getValue() == 0

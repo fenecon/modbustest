@@ -4,9 +4,12 @@ import com.ghgande.j2mod.modbus.ModbusIOException;
 import com.ghgande.j2mod.modbus.ModbusSlaveException;
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.util.BitVector;
-import com.ghgande.j2mod.modbus.util.SerialParameters;
 
-public class KMTronic implements Device {
+public class KMTronic extends ModbusRtuDevice {
+
+	public KMTronic(String systemportname) {
+		super(systemportname);
+	}
 
 	private final static int TIMEOUT = 500; 
 	
@@ -18,8 +21,8 @@ public class KMTronic implements Device {
 	private String[] coilsStatus;
 
 	@Override
-	public boolean detectDevice(SerialParameters params) {
-		ModbusSerialMaster master = new ModbusSerialMaster(params);
+	public boolean detectDevice() {
+		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
 		master.setTimeout(TIMEOUT);
 		try {
 			master.connect();			
@@ -31,8 +34,8 @@ public class KMTronic implements Device {
 	}
 
 	@Override
-	public void printImportantValues(SerialParameters params) throws Exception {
-		ModbusSerialMaster master = new ModbusSerialMaster(params);
+	public void printImportantValues() {
+		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
 		for (int r = 0; r < 8; r++) {
 			coilsStatus = null;
 			try {
@@ -57,7 +60,7 @@ public class KMTronic implements Device {
 	}
 
 	@Override
-	public void printErrors(SerialParameters parems) {
+	public void printErrors() {
 		System.out.println(" ErrKM  ");
 
 	}

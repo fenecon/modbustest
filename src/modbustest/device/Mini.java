@@ -4,19 +4,22 @@ import java.util.HashMap;
 
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
-import com.ghgande.j2mod.modbus.util.SerialParameters;
 
-public class Mini extends BydMiniEs implements Device {
-	
+public class Mini extends ModbusRtuDevice {
+
+	public Mini(String systemportname) {
+		super(systemportname);
+	}
+
 	@Override
 	public String getName() {
 		return "FEMS Mini 3-3 or 3-6";
 		// TODO separate implementation for Mini 3-3 and Mini 3-6
 	}
-	
+
 	@Override
-	public boolean detectDevice(SerialParameters params) {
-		ModbusSerialMaster master = new ModbusSerialMaster(params);
+	public boolean detectDevice() {
+		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
 		try {
 			master.connect();
 			Register[] registers = master.readMultipleRegisters(4, 121, 1);
@@ -38,26 +41,31 @@ public class Mini extends BydMiniEs implements Device {
 	}
 
 	@Override
-	public void printImportantValues(SerialParameters params) throws Exception {
-		ModbusSerialMaster master = new ModbusSerialMaster(params);
-		master.connect();
-		Register[] registers = master.readMultipleRegisters(4, 121, 1);
-		int VoltPhaseA = registers[0].getValue();
-		registers = master.readMultipleRegisters(4, 122, 1);
-		int VoltPhaseB = registers[0].getValue();
-		registers = master.readMultipleRegisters(4, 123, 1);
-		int VoltPhaseC = registers[0].getValue();
-		System.out.println("FENECON MINI ------  VoltPhaseA :  " + VoltPhaseA + "   " + " VoltPhaseB :  " + VoltPhaseB
-				+ "   " + " VoltPhaseC " + VoltPhaseC);
+	public void printImportantValues() {
+		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
+		try {
+			master.connect();
+			Register[] registers = master.readMultipleRegisters(4, 121, 1);
+			int VoltPhaseA = registers[0].getValue();
+			registers = master.readMultipleRegisters(4, 122, 1);
+			int VoltPhaseB = registers[0].getValue();
+			registers = master.readMultipleRegisters(4, 123, 1);
+			int VoltPhaseC = registers[0].getValue();
+			System.out.println("FENECON MINI ------  VoltPhaseA :  " + VoltPhaseA + "   " + " VoltPhaseB :  "
+					+ VoltPhaseB + "   " + " VoltPhaseC " + VoltPhaseC);
 
-		registers = master.readMultipleRegisters(4, 10143, 1);
-		for (Register register : registers) {
-			System.out.println(" --------------FENECON MINI--- SOC is :    " + register + "----------");
+			registers = master.readMultipleRegisters(4, 10143, 1);
+			for (Register register : registers) {
+				System.out.println(" --------------FENECON MINI--- SOC is :    " + register + "----------");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void printErrors(SerialParameters params) {
+	public void printErrors() {
 
 		try {
 			HashMap<Integer, String[]> a = new HashMap<Integer, String[]>();
@@ -153,7 +161,7 @@ public class Mini extends BydMiniEs implements Device {
 					4809 };
 			for (int errorRegister : ErrorRegisters) {
 
-				ModbusSerialMaster master = new ModbusSerialMaster(params);
+				ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
 				Register[] registers = master.readMultipleRegisters(4, errorRegister, 1);
 				String[] messages = a.get(errorRegister);
 				if (registers[0].getValue() == 0
