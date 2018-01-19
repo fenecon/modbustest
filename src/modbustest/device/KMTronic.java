@@ -11,8 +11,6 @@ public class KMTronic extends ModbusRtuDevice {
 		super(systemportname);
 	}
 
-	private final static int TIMEOUT = 500; 
-	
 	@Override
 	public String getName() {
 		return "FEMS Relais (KMTronic)";
@@ -22,14 +20,18 @@ public class KMTronic extends ModbusRtuDevice {
 
 	@Override
 	public boolean detectDevice() {
-		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
-		master.setTimeout(TIMEOUT);
+		ModbusSerialMaster master = null;
 		try {
-			master.connect();			
+			master = getModbusSerialMaster();
+			// if we are able to read exactly 8 coils, we believe this is a KMTronic board
 			master.readCoils(1, 0, 8);
 			return true;
 		} catch (Exception e) {
 			return false;
+		} finally {
+			if (master != null) {
+				master.disconnect();
+			}
 		}
 	}
 
