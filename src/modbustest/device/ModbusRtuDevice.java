@@ -15,26 +15,16 @@ public abstract class ModbusRtuDevice implements Device {
 	}
 	
 	protected ModbusSerialMaster getModbusSerialMaster() throws Exception {
-		ModbusSerialMaster master = new ModbusSerialMaster(getParameters());
-		master.setTimeout(TIMEOUT);
-		master.setRetries(RETRIES);
-		master.connect();
-		return master;	
-	}
-	
-	/**
-	 * Deprecated: use getModbusSerialMaster()
-	 * @return
-	 */
-	@Deprecated
-	protected SerialParameters getParameters() {
 		SerialParameters params = new SerialParameters();
 		params.setPortName(this.systemportname);
 		params.setBaudRate(9600);
 		params.setDatabits(8);
 		params.setParity("None");
 		params.setEncoding("rtu");
-		return params;
+		ModbusSerialMaster master = new ModbusSerialMaster(params);
+		master.setTimeout(TIMEOUT);
+		master.setRetries(RETRIES);
+		master.connect();
+		return master;	
 	}
-	
 }
