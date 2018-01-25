@@ -1,24 +1,31 @@
 package modbustest.device;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
 
 public class Mini extends ModbusRtuDevice {
+	
 	public static final String HIGH_INTENSITY = "\u001B[1m";
-
-	public static final String BLACK = "\u001B[30m";
-	public static final String RED = "\u001B[31m";
-	public static final String GREEN = "\u001B[32m";
-	public static final String YELLOW = "\u001B[33m";
-	public static final String CYAN = "\u001B[36m";
-	public static final String WHITE = "\u001B[37m";
+	   
+    public static final String RED = "\033[1;31m";    // RED
+    public static final String GREEN = "\033[1;32m";  // GREEN
+    public static final String YELLOW= "\033[1;33m"; // YELLOW
+    public static final String BLUE = "\033[1;34m";   // BLUE
+    public static final String CYAN= "\033[1;36m";   // CYAN
+    public static final String WHITE = "\033[1;37m";  // WHITE
 
 	public static final String BACKGROUND_BLACK = "\u001B[40m";
 	public static final String BACKGROUND_RED = "\u001B[41m";
-	public static final String BACKGROUND_WHITE = "\u001B[47m";
 	public static final String ANSI_RESET = "\u001B[0m";
+
+
 	public Mini(String systemportname) {
 		super(systemportname);
 	}
@@ -33,16 +40,33 @@ public class Mini extends ModbusRtuDevice {
 	public boolean detectDevice() {
 		ModbusSerialMaster master = null;
 		try {
+			Map<String, Integer> d = new LinkedHashMap<>();
 			master = getModbusSerialMaster();
 			Register[] registers;
-			registers = master.readMultipleRegisters(4, 122, 1);
-			int VoltPhaseB = registers[0].getValue();
-			registers = master.readMultipleRegisters(4, 123, 1);
-			int VoltPhaseC = registers[0].getValue();
-			registers = master.readMultipleRegisters(4, 2003, 1);
-			int GridVoltage = registers[0].getValue();
 			System.out.println("   ");
-			if ((VoltPhaseB == 0 && VoltPhaseC == 0) && GridVoltage != 0) {
+
+			List<Integer> detectValues = new ArrayList<Integer>();
+
+			int[] detectRegs = { 2003, 122, 123, 132, 133 };
+			for (int detectReg : detectRegs) {
+
+				registers = master.readMultipleRegisters(4, detectReg, 1);
+				detectValues.add(registers[0].getValue());
+			}
+
+			d.put("GridVoltage", (int) detectValues.toArray()[0]);
+			d.put("VoltPhaseB", (int) detectValues.toArray()[1]);
+			d.put("VoltPhaseC", (int) detectValues.toArray()[2]);
+			d.put("GridFreqB", (int) detectValues.toArray()[3]);
+			d.put("GridFreqC", (int) detectValues.toArray()[4]);
+
+			Collection<Integer> vals = d.values();
+			// Respectively
+			// ------------GridVoltage---------------VoltPhaseB--------------------VoltPhaseC------------
+			if ((int) vals.toArray()[0] != 0 && ((int) vals.toArray()[1] == 0 && (int) vals.toArray()[2] == 0)
+			// -----------------GridFreqB---------------------------GridFreqC---------
+					&& ((int) vals.toArray()[3] == 0 && (int) vals.toArray()[4] == 0)) {
+
 				return true;
 			} else {
 				return false;
@@ -87,6 +111,8 @@ public class Mini extends ModbusRtuDevice {
 		try {
 			ModbusSerialMaster master = null;
 			HashMap<Integer, String[]> a = new HashMap<Integer, String[]>();
+
+			// ----------ERROR------------MESSAGES---------------
 			a.put(2011, new String[] { "Control curent overload 100%", "Control curent overload 110%",
 					"Control curent overload 150%", "Control curent overload 200%", "Control curent overload 220%",
 					"Control curent overload 300%", "Control instant cuurent overload 102%", "Grid cuurrent overload",
@@ -175,8 +201,41 @@ public class Mini extends ModbusRtuDevice {
 							"Reservation", "Reservation", "Reservation", "Reservation", "Reservation", "Reservation",
 							"Reservation", "Reservation", "Reservation", "Reservation", "Reservation", "Reservation" });
 
+			// --------------ALARM-------MESSAGES----------------
+			a.put(2041,
+					new String[] { "Grid low voltage", "Grid over voltage", "Grid low frequence", "Grid over frequence",
+							"The grid break abruptly", "Grid condition NOT allowed to be connectted", "Low DC voltage",
+							"High input impedance", "The setting of network jumper is wrong",
+							"Communication fault to inverter", "System time failed", "Reserve", "Reserve", "Reserve",
+							"Reserve", "Reserve" });
+			a.put(3005, new String[] { "General charge over-current alarm", "General discharge over-current alarm",
+					"Charge current limit alarm  ", "Discharge current limit alarm", "General high voltage alarm",
+					"General low voltage alarm", "Abnormal voltage change alarm", "General high temperature alarm",
+					"General low temperature alarm", "Abnormal temperature change alarm", "Severe high voltage alarm",
+					"Severe  low voltage alarm", "Severe  low temperature alarm", "Severve charge over-current alarm",
+					"Severve discharge over-current alarm", "Abnormal cell capacity alarm" });
+			a.put(4810, new String[] { "General  over-current alarm at cell stack charge",
+					"General  over-current alarm at cell stack discharge", "Current limit alarm at cell stack charge",
+					"Current limit alarm at cell stack discharge", "General cell stack high voltage alarm",
+					"General cell stack low voltage alarm", "Abnormal cell stack voltage change alarm",
+					"General cell stack high temperature alarm", "General cell stack low temperature alarm",
+					"Abnormal cell stack temperature change alarm", "Severe cell stack high voltage alarm",
+					"Severe cell stack low voltage alarm", "Severe cell stack low temperature alarm",
+					"Severve over-current alarm at cell stack charge",
+					"Severve over-current alarm at cell stack discharge", "Abnormal cell stack capacity alarm" });
+			a.put(4811,
+					new String[] { "The parameter of EEPROM in cell stack lose effectiveness",
+							"Isolating switch in confluence ark break.",
+							"The communication between cell stack and temperature of collector break",
+							"The temperature of collector fail", "Hall sensor don't work accurately",
+							"The communication of PCS break", "Advanced charging or main contactor close abnormally",
+							"Abnormal sampled voltage", "Abnormal advanced contactor or abnormal RS485 gallery of PCS",
+							"Abnormal main contactor", "General cell stack leakage", "Severe cell stack leakage",
+							"Smoke alarm ", "The communication wire to ammeter break",
+							"The communication wire to dred break", "Reservation" });
+
 			int[] ErrorRegisters = { 2011, 2012, 2013, 2111, 2112, 2113, 2211, 2212, 2213, 3007, 3008, 3207, 3208, 4808,
-					4809 };
+					4809, 2041, 3005, 4810, 4811 };
 			for (int errorRegister : ErrorRegisters) {
 				master = getModbusSerialMaster();
 				Register[] registers = master.readMultipleRegisters(4, errorRegister, 1);
@@ -188,30 +247,41 @@ public class Mini extends ModbusRtuDevice {
 						if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2011 || errorRegister == 2012 || errorRegister == 2013)) {
 
-							System.out.println(HIGH_INTENSITY + RED + "ERROR" + ANSI_RESET + BACKGROUND_RED
+							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Inverter 1)--- : " + messages[j] + BACKGROUND_BLACK);
 
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2111 || errorRegister == 2112 || errorRegister == 2113)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR" + ANSI_RESET + BACKGROUND_RED
+							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Inverter 2)---:  " + messages[j] + BACKGROUND_BLACK);
 
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2211 || errorRegister == 2212 || errorRegister == 2213)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR" + ANSI_RESET + BACKGROUND_RED
+							System.out.println(HIGH_INTENSITY   + RED  + "ERROR : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Inverter 3)--- :  " + messages[j] + BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 3007 || errorRegister == 3008)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR" + ANSI_RESET + BACKGROUND_RED
+							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Battery Group 1)--- :  " + messages[j] + BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 3207 || errorRegister == 3208)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR" + ANSI_RESET + BACKGROUND_RED
+							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Battery Group 2)--- :  " + messages[j] + BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 4808 || errorRegister == 4809)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR" + ANSI_RESET + BACKGROUND_RED
+							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Battery Stack)--- :  " + messages[j] + BACKGROUND_BLACK);
+						} else if (getBit(registers[0].getValue(), j) == true && errorRegister == 2041) {
+							System.out.println(HIGH_INTENSITY + RED  + "ALARM : " + ANSI_RESET + BACKGROUND_RED
+									+ "---(Inverter )--- :  " + messages[j] + BACKGROUND_BLACK);
+						}else if(getBit(registers[0].getValue(),j)==true && errorRegister==3005) {
+							
+							System.out.println(HIGH_INTENSITY + RED  + "ALARM : " + ANSI_RESET + BACKGROUND_RED
+									+ "---(Battery Group )--- :  " + messages[j] + BACKGROUND_BLACK);
+						}else if(getBit(registers[0].getValue(),j)==true && (errorRegister== 4810 || errorRegister == 4811)) {
+							
+							System.out.println(HIGH_INTENSITY + RED  + "ALARM : " + ANSI_RESET + BACKGROUND_RED
+									+ "---(Battery Stack )--- :  " + messages[j] + BACKGROUND_BLACK);
 						}
 					}
 				}
