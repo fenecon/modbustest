@@ -13,13 +13,13 @@ import com.ghgande.j2mod.modbus.procimg.Register;
 public class Pro extends ModbusRtuDevice {
 
 	public static final String HIGH_INTENSITY = "\u001B[1m";
-	   
-    public static final String RED = "\033[1;31m";    // RED
-    public static final String GREEN = "\033[1;32m";  // GREEN
-    public static final String YELLOW= "\033[1;33m"; // YELLOW
-    public static final String BLUE = "\033[1;34m";   // BLUE
-    public static final String CYAN= "\033[1;36m";   // CYAN
-    public static final String WHITE = "\033[1;37m";  // WHITE
+
+	public static final String RED = "\033[1;31m"; // RED
+	public static final String GREEN = "\033[1;32m"; // GREEN
+	public static final String YELLOW = "\033[1;33m"; // YELLOW
+	public static final String BLUE = "\033[1;34m"; // BLUE
+	public static final String CYAN = "\033[1;36m"; // CYAN
+	public static final String WHITE = "\033[1;37m"; // WHITE
 
 	public static final String BACKGROUND_BLACK = "\u001B[40m";
 	public static final String BACKGROUND_RED = "\u001B[41m";
@@ -37,43 +37,26 @@ public class Pro extends ModbusRtuDevice {
 	@Override
 	public boolean detectDevice() {
 		ModbusSerialMaster master = null;
-
 		try {
-			Map<String, Integer> d = new LinkedHashMap<>();
 			master = getModbusSerialMaster();
 			Register[] registers;
-			System.out.println("   ");
 
 			List<Integer> detectValues = new ArrayList<Integer>();
-
-			int[] detectRegs = { 2003, 122, 123, 132, 133 };
+			int[] detectRegs = { 3000, 3001 };
 			for (int detectReg : detectRegs) {
 
 				registers = master.readMultipleRegisters(4, detectReg, 1);
-
 				detectValues.add(registers[0].getValue());
 			}
+			int ChargingPowerLimit = (int) detectValues.toArray()[0];
+			int DischargingPowerLimit = (int) detectValues.toArray()[1];
 
-			d.put("GridVoltage", (int) detectValues.toArray()[0]);
-			d.put("VoltPhaseB", (int) detectValues.toArray()[1]);
-			d.put("VoltPhaseC", (int) detectValues.toArray()[2]);
-			d.put("GridFreqB", (int) detectValues.toArray()[3]);
-			d.put("GridFreqC", (int) detectValues.toArray()[4]);
-
-			Collection<Integer> vals = d.values();
-
-			// Respectively
-			// ------------GridVoltage----------------VoltPhaseB--------------------VoltPhaseC------------
-			if ((int) vals.toArray()[0] != 0 && ((int) vals.toArray()[1] != 0 || (int) vals.toArray()[2] != 0)
-			// -----------------GridFreqB---------------------------GridFreqC---------
-					&& ((int) vals.toArray()[3] != 0 || (int) vals.toArray()[4] != 0)) {
-				
+			if (ChargingPowerLimit > 1600 || DischargingPowerLimit > 1600) {
 				return true;
 			} else {
 				return false;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			return false;
 		}
 	}
@@ -85,11 +68,12 @@ public class Pro extends ModbusRtuDevice {
 			master = getModbusSerialMaster();
 			Register[] registers;
 			int vall = 0;
-			int[] ValueRegs = { 109, 121, 122, 123 };
+			int[] ValueRegs = { 109, 3000, 3001, 121, 122, 123, };
 			HashMap<Integer, String[]> b = new HashMap<Integer, String[]>();
 			b.put(109, new String[] { WHITE + "Current" + HIGH_INTENSITY + GREEN + "  SOC   " + ANSI_RESET + " :"
 					+ HIGH_INTENSITY + GREEN + " % " + ANSI_RESET });
-
+			b.put(3000, new String[] { "Charging Power Limit     :      " });
+			b.put(3001, new String[] { "Discharging Power Limit  :      " });
 			b.put(121, new String[] { "Voltage of Grid phase A  :      " });
 			b.put(122, new String[] { "Voltage of Grid phase B  :      " });
 			b.put(123, new String[] { "Voltage of Grid phase C  :      " });
@@ -257,7 +241,7 @@ public class Pro extends ModbusRtuDevice {
 
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2211 || errorRegister == 2212 || errorRegister == 2213)) {
-							System.out.println(HIGH_INTENSITY   + RED  + "ERROR : " + ANSI_RESET + BACKGROUND_RED
+							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Inverter 3)--- :  " + messages[j] + BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 3007 || errorRegister == 3008)) {
@@ -272,15 +256,16 @@ public class Pro extends ModbusRtuDevice {
 							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Battery Stack)--- :  " + messages[j] + BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true && errorRegister == 2041) {
-							System.out.println(HIGH_INTENSITY + RED  + "ALARM : " + ANSI_RESET + BACKGROUND_RED
+							System.out.println(HIGH_INTENSITY + RED + "ALARM : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Inverter )--- :  " + messages[j] + BACKGROUND_BLACK);
-						}else if(getBit(registers[0].getValue(),j)==true && errorRegister==3005) {
-							
-							System.out.println(HIGH_INTENSITY + RED  + "ALARM : " + ANSI_RESET + BACKGROUND_RED
+						} else if (getBit(registers[0].getValue(), j) == true && errorRegister == 3005) {
+
+							System.out.println(HIGH_INTENSITY + RED + "ALARM : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Battery Group )--- :  " + messages[j] + BACKGROUND_BLACK);
-						}else if(getBit(registers[0].getValue(),j)==true && (errorRegister== 4810 || errorRegister == 4811)) {
-							
-							System.out.println(HIGH_INTENSITY + RED  + "ALARM : " + ANSI_RESET + BACKGROUND_RED
+						} else if (getBit(registers[0].getValue(), j) == true
+								&& (errorRegister == 4810 || errorRegister == 4811)) {
+
+							System.out.println(HIGH_INTENSITY + RED + "ALARM : " + ANSI_RESET + BACKGROUND_RED
 									+ "---(Battery Stack )--- :  " + messages[j] + BACKGROUND_BLACK);
 						}
 					}

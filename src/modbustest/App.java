@@ -8,6 +8,7 @@ import modbustest.device.Mini;
 import modbustest.device.Socomec;
 import modbustest.device.KMTronic;
 import modbustest.device.Pro;
+import modbustest.device.ProHybrid;
 
 public class App {
 
@@ -49,6 +50,7 @@ public class App {
 					devices.add(new KMTronic(deviceName));
 					devices.add(new Pro(deviceName));
 					devices.add(new Mini(deviceName));
+					devices.add(new ProHybrid(deviceName));
 					System.out.println(HIGH_INTENSITY + YELLOW + "Trying [" + deviceName + "]" + ANSI_RESET);
 					for (Device device : devices) {
 						System.out.println(
