@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
@@ -48,23 +49,20 @@ public class Pro extends ModbusRtuDevice {
 		ModbusSerialMaster master = null;
 		try {
 			master = getModbusSerialMaster();
-			Register[] registers;
-			int vall = 0;
-			int[] ValueRegs = { 109, 3000, 3001, 121, 122, 123, };
-			HashMap<Integer, String[]> b = new HashMap<Integer, String[]>();
-			b.put(109, new String[] { Log.WHITE + "Current" + Log.HIGH_INTENSITY + Log.GREEN + "  SOC   " + Log.ANSI_RESET + " :"
-					+ Log.HIGH_INTENSITY + Log.GREEN + " % " + Log.ANSI_RESET });
-			b.put(3000, new String[] { "Charging Power Limit     :      " });
-			b.put(3001, new String[] { "Discharging Power Limit  :      " });
-			b.put(121, new String[] { "Voltage of Grid phase A  :      " });
-			b.put(122, new String[] { "Voltage of Grid phase B  :      " });
-			b.put(123, new String[] { "Voltage of Grid phase C  :      " });
 
-			for (int valuereg : ValueRegs) {
-				String[] messages = b.get(valuereg);
-				registers = master.readMultipleRegisters(4, valuereg, 1);
-				vall = registers[0].getValue();
-				Log.println(messages[0] + Log.HIGH_INTENSITY + Log.GREEN + vall + Log.ANSI_RESET);
+			HashMap<Integer, String> b = new HashMap<Integer, String>();
+			b.put(109, Log.WHITE + "Current" + Log.HIGH_INTENSITY + Log.GREEN + "  SOC   " + Log.ANSI_RESET + " :"
+					+ Log.HIGH_INTENSITY + Log.GREEN + " % " + Log.ANSI_RESET);
+			b.put(3000, "Charging Power Limit     :      ");
+			b.put(3001, "Discharging Power Limit  :      ");
+			b.put(121, "Voltage of Grid phase A  :      ");
+			b.put(122, "Voltage of Grid phase B  :      ");
+			b.put(123, "Voltage of Grid phase C  :      ");
+
+			for(Entry<Integer, String> entry : b.entrySet()) {
+				Register[] registers = master.readMultipleRegisters(4, entry.getKey(), 1);
+				int vall = registers[0].getValue();
+				Log.println(entry.getValue() + Log.HIGH_INTENSITY + Log.GREEN + vall + Log.ANSI_RESET);		
 			}
 		} catch (Exception e) {
 			Log.exception(e);
