@@ -28,19 +28,12 @@ public class Pro extends ModbusRtuDevice {
 		ModbusSerialMaster master = null;
 		try {
 			master = getModbusSerialMaster();
-			Register[] registers;
 
-			List<Integer> detectValues = new ArrayList<Integer>();
-			int[] detectRegs = { 3000, 3001 };
-			for (int detectReg : detectRegs) {
+			Register[] registers = master.readMultipleRegisters(4, 3000, 2);
+			int chargingPowerLimit = registers[0].getValue();
+			int dischargingPowerLimit = registers[1].getValue();
 
-				registers = master.readMultipleRegisters(4, detectReg, 1);
-				detectValues.add(registers[0].getValue());
-			}
-			int ChargingPowerLimit = (int) detectValues.toArray()[0];
-			int DischargingPowerLimit = (int) detectValues.toArray()[1];
-
-			if (ChargingPowerLimit > 1600 || DischargingPowerLimit > 1600) {
+			if (chargingPowerLimit > 1600 || dischargingPowerLimit > 1600) {
 				return true;
 			} else {
 				return false;
