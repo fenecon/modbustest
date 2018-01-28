@@ -7,20 +7,9 @@ import java.util.List;
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
 
+import modbustest.util.Log;
+
 public class Mini extends ModbusRtuDevice {
-
-	public static final String HIGH_INTENSITY = "\u001B[1m";
-
-	public static final String RED = "\033[1;31m"; // RED
-	public static final String GREEN = "\033[1;32m"; // GREEN
-	public static final String YELLOW = "\033[1;33m"; // YELLOW
-	public static final String BLUE = "\033[1;34m"; // BLUE
-	public static final String CYAN = "\033[1;36m"; // CYAN
-	public static final String WHITE = "\033[1;37m"; // WHITE
-
-	public static final String BACKGROUND_BLACK = "\u001B[40m";
-	public static final String BACKGROUND_RED = "\u001B[41m";
-	public static final String ANSI_RESET = "\u001B[0m";
 
 	public Mini(String systemportname) {
 		super(systemportname);
@@ -69,8 +58,8 @@ public class Mini extends ModbusRtuDevice {
 			int vall = 0;
 			int[] ValueRegs = { 10143, 3000, 3001, 121, 122, 123 };
 			HashMap<Integer, String[]> b = new HashMap<Integer, String[]>();
-			b.put(109, new String[] { WHITE + "Current" + HIGH_INTENSITY + GREEN + "  SOC   " + ANSI_RESET + " :"
-					+ HIGH_INTENSITY + GREEN + " % " + ANSI_RESET });
+			b.put(109, new String[] { Log.WHITE + "Current" + Log.HIGH_INTENSITY + Log.GREEN + "  SOC   " + Log.ANSI_RESET + " :"
+					+ Log.HIGH_INTENSITY + Log.GREEN + " % " + Log.ANSI_RESET });
 			b.put(3000, new String[] { "Charging Power Limit     :      " });
 			b.put(3001, new String[] { "Discharging Power Limit  :      " });
 			b.put(121, new String[] { "Voltage of Grid phase A  :      " });
@@ -81,11 +70,10 @@ public class Mini extends ModbusRtuDevice {
 				String[] messages = b.get(valuereg);
 				registers = master.readMultipleRegisters(4, valuereg, 1);
 				vall = registers[0].getValue();
-				System.out.println(messages[0] + HIGH_INTENSITY + GREEN + vall + ANSI_RESET);
+				Log.info(messages[0] + Log.HIGH_INTENSITY + Log.GREEN + vall + Log.ANSI_RESET);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.exception(e);
 		}
 	}
 
@@ -231,51 +219,48 @@ public class Mini extends ModbusRtuDevice {
 						if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2011 || errorRegister == 2012 || errorRegister == 2013)) {
 
-							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
-									+ "---(Inverter 1)--- : " + messages[j] + BACKGROUND_BLACK);
+							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+									+ "---(Inverter 1)--- : " + messages[j] + Log.BACKGROUND_BLACK);
 
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2111 || errorRegister == 2112 || errorRegister == 2113)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
-									+ "---(Inverter 2)---:  " + messages[j] + BACKGROUND_BLACK);
+							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+									+ "---(Inverter 2)---:  " + messages[j] + Log.BACKGROUND_BLACK);
 
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2211 || errorRegister == 2212 || errorRegister == 2213)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
-									+ "---(Inverter 3)--- :  " + messages[j] + BACKGROUND_BLACK);
+							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+									+ "---(Inverter 3)--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 3007 || errorRegister == 3008)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
-									+ "---(Battery Group 1)--- :  " + messages[j] + BACKGROUND_BLACK);
+							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+									+ "---(Battery Group 1)--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 3207 || errorRegister == 3208)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
-									+ "---(Battery Group 2)--- :  " + messages[j] + BACKGROUND_BLACK);
+							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+									+ "---(Battery Group 2)--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 4808 || errorRegister == 4809)) {
-							System.out.println(HIGH_INTENSITY + RED + "ERROR : " + ANSI_RESET + BACKGROUND_RED
-									+ "---(Battery Stack)--- :  " + messages[j] + BACKGROUND_BLACK);
+							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+									+ "---(Battery Stack)--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true && errorRegister == 2041) {
-							System.out.println(HIGH_INTENSITY + RED + "ALARM : " + ANSI_RESET + BACKGROUND_RED
-									+ "---(Inverter )--- :  " + messages[j] + BACKGROUND_BLACK);
+							Log.println(Log.HIGH_INTENSITY + Log.RED + "ALARM : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+									+ "---(Inverter )--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true && errorRegister == 3005) {
 
-							System.out.println(HIGH_INTENSITY + RED + "ALARM : " + ANSI_RESET + BACKGROUND_RED
-									+ "---(Battery Group )--- :  " + messages[j] + BACKGROUND_BLACK);
+							Log.println(Log.HIGH_INTENSITY + Log.RED + "ALARM : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+									+ "---(Battery Group )--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 4810 || errorRegister == 4811)) {
 
-							System.out.println(HIGH_INTENSITY + RED + "ALARM : " + ANSI_RESET + BACKGROUND_RED
-									+ "---(Battery Stack )--- :  " + messages[j] + BACKGROUND_BLACK);
+							Log.println(Log.HIGH_INTENSITY + Log.RED + "ALARM : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+									+ "---(Battery Stack )--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						}
 					}
 				}
 			}
-		} catch (
-
-		Exception e) {
-			System.out.println(e.getMessage());
-
+		} catch (Exception e) {
+			Log.exception(e);
 		}
 	}
 

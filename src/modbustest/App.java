@@ -6,25 +6,12 @@ import com.fazecast.jSerialComm.SerialPort;
 import modbustest.device.Device;
 import modbustest.device.Mini;
 import modbustest.device.Socomec;
+import modbustest.util.Log;
 import modbustest.device.KMTronic;
 import modbustest.device.Pro;
 import modbustest.device.ProHybrid;
 
 public class App {
-
-	public static final String HIGH_INTENSITY = "\u001B[1m";
-
-	public static final String BLACK = "\u001B[30m";
-	public static final String RED = "\u001B[31m";
-	public static final String GREEN = "\u001B[32m";
-	public static final String YELLOW = "\u001B[33m";
-	public static final String CYAN = "\u001B[36m";
-	public static final String WHITE = "\u001B[37m";
-
-	public static final String BACKGROUND_BLACK = "\u001B[40m";
-	public static final String BACKGROUND_RED = "\u001B[41m";
-	public static final String BACKGROUND_WHITE = "\u001B[47m";
-	public static final String ANSI_RESET = "\u001B[0m";
 
 	public static void main(String[] args) throws Exception {
 		boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
@@ -51,27 +38,27 @@ public class App {
 					devices.add(new Pro(deviceName));
 					devices.add(new Mini(deviceName));
 					devices.add(new ProHybrid(deviceName));
-					System.out.println(HIGH_INTENSITY + YELLOW + "Trying [" + deviceName + "]" + ANSI_RESET);
+					Log.info(Log.HIGH_INTENSITY + Log.YELLOW + "Trying [" + deviceName + "]" + Log.ANSI_RESET);
 					for (Device device : devices) {
-						System.out.println(
-								HIGH_INTENSITY + CYAN + "- Trying to find [" + device.getName() + "]" + ANSI_RESET);
+						Log.info(
+								Log.HIGH_INTENSITY + Log.CYAN + "- Trying to find [" + device.getName() + "]" + Log.ANSI_RESET);
 						if (device.detectDevice()) {
-							System.out.println(
-									"Detected " + HIGH_INTENSITY + GREEN + "[" + device.getName() + "]" + ANSI_RESET);
+							Log.info(
+									"Detected " + Log.HIGH_INTENSITY + Log.GREEN + "[" + device.getName() + "]" + Log.ANSI_RESET);
 							device.printImportantValues();
-							System.out.println(" ");
+							Log.info(" ");
 							device.printErrors();
-							System.out.println(" " );
+							Log.info(" " );
 						}
 					}
 				}
-				System.out.println("  ");
+				Log.info("  ");
 			} else {
-				System.out.println(RED + "FAIL : No USB-RS485 converter connected: " + ANSI_RESET);
+				Log.error("No USB-RS485 converter connected: ");
 
 			}
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			Log.exception(e);
 		}
 	}
 }
