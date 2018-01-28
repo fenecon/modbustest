@@ -1,11 +1,6 @@
 package modbustest.device;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
@@ -59,10 +54,10 @@ public class Pro extends ModbusRtuDevice {
 			b.put(122, "Voltage of Grid phase B  :      ");
 			b.put(123, "Voltage of Grid phase C  :      ");
 
-			for(Entry<Integer, String> entry : b.entrySet()) {
+			for (Entry<Integer, String> entry : b.entrySet()) {
 				Register[] registers = master.readMultipleRegisters(4, entry.getKey(), 1);
 				int vall = registers[0].getValue();
-				Log.println(entry.getValue() + Log.HIGH_INTENSITY + Log.GREEN + vall + Log.ANSI_RESET);		
+				Log.println(entry.getValue() + Log.HIGH_INTENSITY + Log.GREEN + vall + Log.ANSI_RESET);
 			}
 		} catch (Exception e) {
 			Log.exception(e);
