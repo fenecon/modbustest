@@ -1,7 +1,12 @@
 package modbustest.device;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
+
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
+
+import modbustest.util.Log;
 
 public class ProHybrid extends ModbusRtuDevice {
 
@@ -35,6 +40,22 @@ public class ProHybrid extends ModbusRtuDevice {
 
 	@Override
 	public void printImportantValues() {
+		ModbusSerialMaster master = null;
+		try {
+			master = getModbusSerialMaster();
+
+			HashMap<Integer, String> b = new HashMap<Integer, String>();
+			b.put(109, Log.WHITE + "Current" + Log.HIGH_INTENSITY + Log.GREEN + "  SOC   " + Log.ANSI_RESET + " :"
+					+ Log.HIGH_INTENSITY + Log.GREEN + " % " + Log.ANSI_RESET);
+
+			for (Entry<Integer, String> entry : b.entrySet()) {
+				Register[] registers = master.readMultipleRegisters(4, entry.getKey(), 1);
+				int vall = registers[0].getValue();
+				Log.info(entry.getValue() + Log.HIGH_INTENSITY + Log.GREEN + vall + Log.ANSI_RESET);
+			}
+		} catch (Exception e) {
+			Log.exception(e);
+		}
 
 	}
 

@@ -43,9 +43,9 @@ public class KMTronic extends ModbusRtuDevice {
 
 			for (int i = 0; i < coils.size(); i++) {
 				boolean coil = coils.getBit(i);
-				Log.print(Log.GREEN + i + Log.ANSI_RESET + 1 + Log.GREEN + " [" + coil + "] + " + Log.ANSI_RESET);
+				Log.info(Log.GREEN + i + Log.ANSI_RESET + 1 + Log.GREEN + " [" + coil + "] + " + Log.ANSI_RESET);
 			}
-			Log.print("\n");
+			Log.info("\n");
 		} catch (Exception e) {
 			Log.error("  " + e.getMessage());
 		} finally {

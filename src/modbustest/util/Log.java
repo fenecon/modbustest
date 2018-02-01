@@ -40,10 +40,6 @@ public class Log {
 	 * @param message
 	 */
 	// TODO replace by more specialized methods
-	@Deprecated
-	public static void print(String message) {
-		System.out.print(message);
-	}
 	
 	/**
 	 * Handle info message

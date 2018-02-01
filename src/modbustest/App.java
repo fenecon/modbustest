@@ -27,6 +27,8 @@ public class App {
 						deviceName = port.getSystemPortName();
 					} else if (port.getSystemPortName().equals("ttyS0")) {
 						continue; // ignore ttyS0
+					} else if (port.getSystemPortName().equals("ttyO0")) {
+						continue; // ignore ttyS0
 					} else {
 						deviceName = "/dev/" + port.getSystemPortName();
 					}

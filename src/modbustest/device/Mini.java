@@ -1,8 +1,7 @@
 package modbustest.device;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map.Entry;
 
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
@@ -26,27 +25,19 @@ public class Mini extends ModbusRtuDevice {
 		ModbusSerialMaster master = null;
 		try {
 			master = getModbusSerialMaster();
-			Register[] registers;
 
-			List<Integer> detectValues = new ArrayList<Integer>();
-			int[] detectRegs = { 3000, 3001 };
-			for (int detectReg : detectRegs) {
-
-				registers = master.readMultipleRegisters(4, detectReg, 1);
-				detectValues.add(registers[0].getValue());
-			}
-			int ChargingPowerLimit = (int) detectValues.toArray()[0];
-			int DischargingPowerLimit = (int) detectValues.toArray()[1];
-
-			if ((ChargingPowerLimit) != 0 && DischargingPowerLimit != 0
-					&& (ChargingPowerLimit < 700 || DischargingPowerLimit < 700)) {
-				return true;
-			} else {
+			Register[] registers = master.readMultipleRegisters(4, 3000, 1);
+			int chargingPowerLimit = registers[0].getValue();
+			registers = master.readMultipleRegisters(4, 3001, 1);
+			int dischargingPowerLimit = registers[0].getValue();
+				if (chargingPowerLimit!=0 && dischargingPowerLimit!=0 && (chargingPowerLimit <700 || dischargingPowerLimit <700)) {
+					return true;
+				} else {
+					return false;
+				}
+			} catch (Exception e) {
 				return false;
 			}
-		} catch (Exception e) {
-			return false;
-		}
 	}
 
 	@Override
@@ -55,22 +46,19 @@ public class Mini extends ModbusRtuDevice {
 		try {
 			master = getModbusSerialMaster();
 			Register[] registers;
-			int vall = 0;
-			int[] ValueRegs = { 10143, 3000, 3001, 121, 122, 123 };
-			HashMap<Integer, String[]> b = new HashMap<Integer, String[]>();
-			b.put(109, new String[] { Log.WHITE + "Current" + Log.HIGH_INTENSITY + Log.GREEN + "  SOC   " + Log.ANSI_RESET + " :"
-					+ Log.HIGH_INTENSITY + Log.GREEN + " % " + Log.ANSI_RESET });
-			b.put(3000, new String[] { "Charging Power Limit     :      " });
-			b.put(3001, new String[] { "Discharging Power Limit  :      " });
-			b.put(121, new String[] { "Voltage of Grid phase A  :      " });
-			b.put(122, new String[] { "Voltage of Grid phase B  :      " });
-			b.put(123, new String[] { "Voltage of Grid phase C  :      " });
+			HashMap<Integer, String> b = new HashMap<Integer, String>();
+			b.put(109, Log.WHITE + "Current" + Log.HIGH_INTENSITY + Log.GREEN + "  SOC   " + Log.ANSI_RESET + " :"
+					+ Log.HIGH_INTENSITY + Log.GREEN + " % " + Log.ANSI_RESET );
+			b.put(3000,  "Charging Power Limit     :      " );
+			b.put(3001,  "Discharging Power Limit  :      " );
+			b.put(121,  "Voltage of Grid phase A  :      " );
+			b.put(122,  "Voltage of Grid phase B  :      " );
+			b.put(123,  "Voltage of Grid phase C  :      " );
 
-			for (int valuereg : ValueRegs) {
-				String[] messages = b.get(valuereg);
-				registers = master.readMultipleRegisters(4, valuereg, 1);
-				vall = registers[0].getValue();
-				Log.info(messages[0] + Log.HIGH_INTENSITY + Log.GREEN + vall + Log.ANSI_RESET);
+			for (Entry<Integer, String> entry : b.entrySet()) {
+				 registers = master.readMultipleRegisters(4, entry.getKey(), 1);
+				int vall = registers[0].getValue();
+				Log.info(entry.getValue() + Log.HIGH_INTENSITY + Log.GREEN + vall + Log.ANSI_RESET);
 			}
 		} catch (Exception e) {
 			Log.exception(e);
@@ -219,41 +207,41 @@ public class Mini extends ModbusRtuDevice {
 						if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2011 || errorRegister == 2012 || errorRegister == 2013)) {
 
-							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+							Log.info(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
 									+ "---(Inverter 1)--- : " + messages[j] + Log.BACKGROUND_BLACK);
 
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2111 || errorRegister == 2112 || errorRegister == 2113)) {
-							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+							Log.info(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
 									+ "---(Inverter 2)---:  " + messages[j] + Log.BACKGROUND_BLACK);
 
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 2211 || errorRegister == 2212 || errorRegister == 2213)) {
-							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+							Log.info(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
 									+ "---(Inverter 3)--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 3007 || errorRegister == 3008)) {
-							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+							Log.info(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
 									+ "---(Battery Group 1)--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 3207 || errorRegister == 3208)) {
-							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+							Log.info(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
 									+ "---(Battery Group 2)--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 4808 || errorRegister == 4809)) {
-							Log.println(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+							Log.info(Log.HIGH_INTENSITY + Log.RED + "ERROR : " + Log.ANSI_RESET + Log.BACKGROUND_RED
 									+ "---(Battery Stack)--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true && errorRegister == 2041) {
-							Log.println(Log.HIGH_INTENSITY + Log.RED + "ALARM : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+							Log.info(Log.HIGH_INTENSITY + Log.RED + "ALARM : " + Log.ANSI_RESET + Log.BACKGROUND_RED
 									+ "---(Inverter )--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true && errorRegister == 3005) {
 
-							Log.println(Log.HIGH_INTENSITY + Log.RED + "ALARM : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+							Log.info(Log.HIGH_INTENSITY + Log.RED + "ALARM : " + Log.ANSI_RESET + Log.BACKGROUND_RED
 									+ "---(Battery Group )--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						} else if (getBit(registers[0].getValue(), j) == true
 								&& (errorRegister == 4810 || errorRegister == 4811)) {
 
-							Log.println(Log.HIGH_INTENSITY + Log.RED + "ALARM : " + Log.ANSI_RESET + Log.BACKGROUND_RED
+							Log.info(Log.HIGH_INTENSITY + Log.RED + "ALARM : " + Log.ANSI_RESET + Log.BACKGROUND_RED
 									+ "---(Battery Stack )--- :  " + messages[j] + Log.BACKGROUND_BLACK);
 						}
 					}
