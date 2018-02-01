@@ -55,6 +55,7 @@ public class Pro extends ModbusRtuDevice {
 			b.put(121, "Voltage of Grid phase A  :      ");
 			b.put(122, "Voltage of Grid phase B  :      ");
 			b.put(123, "Voltage of Grid phase C  :      ");
+			b.put(4800, "Total Battery Cabinet   :       " );
 
 			for (Entry<Integer, String> entry : b.entrySet()) {
 				Register[] registers = master.readMultipleRegisters(4, entry.getKey(), 1);

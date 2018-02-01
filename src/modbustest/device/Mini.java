@@ -8,20 +8,25 @@ import com.ghgande.j2mod.modbus.procimg.Register;
 
 import modbustest.util.Log;
 
-public class Mini extends ModbusRtuDevice {
+public abstract class Mini extends ModbusRtuDevice {
 
 	public Mini(String systemportname) {
 		super(systemportname);
 	}
 
-	@Override
-	public String getName() {
-		return "FEMS Mini 3-3 or 3-6";
-		// TODO separate implementation for Mini 3-3 and Mini 3-6
+	protected int batteryCabinet() {
+		ModbusSerialMaster master = null;
+		Register[] registers;
+		try {
+			master = getModbusSerialMaster();
+			registers = master.readMultipleRegisters(4, 4800, 1);
+			return registers[0].getValue();
+		} catch (Exception e) {
+		}
+		return 0;
 	}
 
-	@Override
-	public boolean detectDevice() {
+	protected boolean detectMini() {
 		ModbusSerialMaster master = null;
 		try {
 			master = getModbusSerialMaster();
@@ -30,14 +35,18 @@ public class Mini extends ModbusRtuDevice {
 			int chargingPowerLimit = registers[0].getValue();
 			registers = master.readMultipleRegisters(4, 3001, 1);
 			int dischargingPowerLimit = registers[0].getValue();
-				if (chargingPowerLimit!=0 && dischargingPowerLimit!=0 && (chargingPowerLimit <700 || dischargingPowerLimit <700)) {
-					return true;
-				} else {
-					return false;
-				}
-			} catch (Exception e) {
+			registers = master.readMultipleRegisters(4, 2043, 1);
+			int pcsVersion = registers[0].getValue();
+
+			if (chargingPowerLimit != 0 && dischargingPowerLimit != 0
+					&& (chargingPowerLimit < 700 || dischargingPowerLimit < 700) && pcsVersion > 500) {
+				return true;
+			} else {
 				return false;
 			}
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	@Override
@@ -48,15 +57,15 @@ public class Mini extends ModbusRtuDevice {
 			Register[] registers;
 			HashMap<Integer, String> b = new HashMap<Integer, String>();
 			b.put(109, Log.WHITE + "Current" + Log.HIGH_INTENSITY + Log.GREEN + "  SOC   " + Log.ANSI_RESET + " :"
-					+ Log.HIGH_INTENSITY + Log.GREEN + " % " + Log.ANSI_RESET );
-			b.put(3000,  "Charging Power Limit     :      " );
-			b.put(3001,  "Discharging Power Limit  :      " );
-			b.put(121,  "Voltage of Grid phase A  :      " );
-			b.put(122,  "Voltage of Grid phase B  :      " );
-			b.put(123,  "Voltage of Grid phase C  :      " );
-
+					+ Log.HIGH_INTENSITY + Log.GREEN + " % " + Log.ANSI_RESET);
+			b.put(3000, "Charging Power Limit     :      ");
+			b.put(3001, "Discharging Power Limit  :      ");
+			b.put(121, "Voltage of Grid phase A  :      ");
+			b.put(122, "Voltage of Grid phase B  :      ");
+			b.put(123, "Voltage of Grid phase C  :      ");
+			b.put(4800, "Total Battery Cabinet   :       ");
 			for (Entry<Integer, String> entry : b.entrySet()) {
-				 registers = master.readMultipleRegisters(4, entry.getKey(), 1);
+				registers = master.readMultipleRegisters(4, entry.getKey(), 1);
 				int vall = registers[0].getValue();
 				Log.info(entry.getValue() + Log.HIGH_INTENSITY + Log.GREEN + vall + Log.ANSI_RESET);
 			}
@@ -255,4 +264,5 @@ public class Mini extends ModbusRtuDevice {
 	public boolean getBit(int n, int k) {
 		return (((n >> k) & 1) == 1 ? true : false);
 	}
+
 }

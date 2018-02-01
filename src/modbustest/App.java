@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import com.fazecast.jSerialComm.SerialPort;
 import modbustest.device.Device;
-import modbustest.device.Mini;
+import modbustest.device.Mini_3_3;
+import modbustest.device.Mini_3_6;
 import modbustest.device.Socomec;
 import modbustest.util.Log;
 import modbustest.device.KMTronic;
@@ -38,7 +39,8 @@ public class App {
 					devices.add(new Socomec(deviceName));
 					devices.add(new KMTronic(deviceName));
 					devices.add(new Pro(deviceName));
-					devices.add(new Mini(deviceName));
+					devices.add(new Mini_3_3(deviceName));
+					devices.add(new Mini_3_6(deviceName));
 					devices.add(new ProHybrid(deviceName));
 					Log.info(Log.HIGH_INTENSITY + Log.YELLOW + "Trying [" + deviceName + "]" + Log.ANSI_RESET);
 					for (Device device : devices) {
@@ -50,7 +52,7 @@ public class App {
 							device.printImportantValues();
 							Log.info(" ");
 							device.printErrors();
-							Log.info(" " );
+							Log.info(" ");
 						}
 					}
 				}
