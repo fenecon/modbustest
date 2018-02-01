@@ -40,7 +40,7 @@ public class Socomec extends ModbusRtuDevice {
 		Register[] registers;
 		try {
 			master = getModbusSerialMaster();
-			registers = master.readMultipleRegisters(50005, 1);
+			registers = master.readMultipleRegisters(5, 50005, 1);
 			Log.info("SOCOMEC ID is :   "  + Log.GREEN + registers[0].getValue() + Log.ANSI_RESET);
 		} catch (ModbusException e) {
 			Log.exception(e);
