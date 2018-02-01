@@ -31,7 +31,7 @@ public class Pro extends ModbusRtuDevice {
 			int dischargingPowerLimit = registers[0].getValue();
 			registers = master.readMultipleRegisters(4, 2043, 1);
 			int pcsVersion = registers[0].getValue();
-			if ((chargingPowerLimit > 1600 || dischargingPowerLimit > 1600)&& pcsVersion>500) {
+			if ((chargingPowerLimit > 1400 || dischargingPowerLimit > 1400) && pcsVersion > 500) {
 				return true;
 			} else {
 				return false;
@@ -55,7 +55,6 @@ public class Pro extends ModbusRtuDevice {
 			b.put(121, "Voltage of Grid phase A  :      ");
 			b.put(122, "Voltage of Grid phase B  :      ");
 			b.put(123, "Voltage of Grid phase C  :      ");
-			b.put(4800, "Total Battery Cabinet   :       " );
 
 			for (Entry<Integer, String> entry : b.entrySet()) {
 				Register[] registers = master.readMultipleRegisters(4, entry.getKey(), 1);
