@@ -24,24 +24,6 @@ public class Log {
 	public static final String ANSI_RESET = "\u001B[0m";
 	
 	/**
-	 * Handle raw println
-	 * 
-	 * @param message
-	 */
-	// TODO replace by more specialized methods
-	@Deprecated
-	public static void println(String message) {
-		System.out.println(message);
-	}
-	
-	/**
-	 * Handle raw print without newline
-	 * 
-	 * @param message
-	 */
-	// TODO replace by more specialized methods
-	
-	/**
 	 * Handle info message
 	 * 
 	 * @param message
