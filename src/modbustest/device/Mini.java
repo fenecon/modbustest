@@ -32,14 +32,14 @@ public abstract class Mini extends ModbusRtuDevice {
 			master = getModbusSerialMaster();
 
 			Register[] registers = master.readMultipleRegisters(4, 3000, 1);
-			int chargingPowerLimit = registers[0].getValue();
+			int chargingCurrentLimit = registers[0].getValue();
 			registers = master.readMultipleRegisters(4, 3001, 1);
-			int dischargingPowerLimit = registers[0].getValue();
+			int dischargingCurrentLimit = registers[0].getValue();
 			registers = master.readMultipleRegisters(4, 2043, 1);
 			int pcsVersion = registers[0].getValue();
 
-			if (chargingPowerLimit != 0 && dischargingPowerLimit != 0
-					&& (chargingPowerLimit < 700 || dischargingPowerLimit < 700) && pcsVersion > 500) {
+			if (chargingCurrentLimit != 0 && dischargingCurrentLimit != 0
+					&& (chargingCurrentLimit < 700 || dischargingCurrentLimit < 700) && pcsVersion > 500) {
 				return true;
 			} else {
 				return false;

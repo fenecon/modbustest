@@ -24,10 +24,13 @@ public class Socomec extends ModbusRtuDevice {
 			master = getModbusSerialMaster();
 			// try different unit ids (common ones are 5 or 6)
 			Register[] registers = master.readMultipleRegisters(5, 50005, 1);
-			if (registers[0].getValue() == 0) {
-				return false;
-			} else {
+			int ID5 = registers[0].getValue();
+			registers = master.readMultipleRegisters(6, 50005, 1);
+			int ID6 = registers[0].getValue();
+			if (ID5 != 0 || ID6!=0 ) {
 				return true;
+			} else {
+				return false;
 			}
 		} catch (Exception e) {
 			return false;
