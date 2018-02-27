@@ -39,7 +39,7 @@ public abstract class Mini extends ModbusRtuDevice {
 			int pcsVersion = registers[0].getValue();
 
 			if (chargingCurrentLimit != 0 && dischargingCurrentLimit != 0
-					&& (chargingCurrentLimit < 700 || dischargingCurrentLimit < 700) && pcsVersion > 500) {
+					&& (chargingCurrentLimit < 700 && dischargingCurrentLimit < 700) && pcsVersion > 500) {
 				return true;
 			} else {
 				return false;
