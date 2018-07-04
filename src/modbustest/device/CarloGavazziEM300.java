@@ -1,6 +1,7 @@
 package modbustest.device;
 
-import com.ghgande.j2mod.modbus.ModbusException;
+import java.util.Optional;
+
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
 
@@ -9,7 +10,7 @@ import modbustest.util.Log;
 public class CarloGavazziEM300 extends ModbusRtuDevice {
 
 	private final int OFFSET = 300000 + 1;
-	
+
 	public CarloGavazziEM300(String systemportname) {
 		super(systemportname);
 	}
@@ -21,43 +22,44 @@ public class CarloGavazziEM300 extends ModbusRtuDevice {
 
 	@Override
 	public boolean detectDevice() {
-		ModbusSerialMaster master = null;
-		try {
-			master = getModbusSerialMaster();
-			Register[] registers = master.readMultipleRegisters(5, 300052 - OFFSET, 1);
-			int ID5 = registers[0].getValue();
-			if (ID5 != 0) {
-				return true;
-			} else {
-				return false;
+		boolean detected = false;
+		for (int unitId = 1; unitId < 6; unitId++) {
+			Optional<Integer> valueOpt = readData(unitId);
+			if (valueOpt.isPresent()) {
+				Log.info("Frequency is :   " + Log.GREEN + valueOpt.get() + Log.ANSI_RESET);
+				detected = true;
 			}
-		} catch (Exception e) {
-			return false;
-		} finally {
-			master.disconnect();
 		}
+		return detected;
 	}
 
 	@Override
-	public void printImportantValues() {
+	public boolean detectDevice(String id) {
+		boolean detected = false;
+		int unitId = Integer.parseInt(id);
+		Optional<Integer> valueOpt = readData(unitId);
+		if (valueOpt.isPresent()) {
+			Log.info("Frequency is :   " + Log.GREEN + valueOpt.get() + Log.ANSI_RESET);
+			detected = true;
+		}
+		return detected;
+	}
+
+	private final Optional<Integer> readData(int unitId) {
+		Log.info(Log.HIGH_INTENSITY + Log.CYAN + "- - Trying Unit-ID [" + unitId + "]");
 		ModbusSerialMaster master = null;
-		Register[] registers;
 		try {
 			master = getModbusSerialMaster();
-			registers = master.readMultipleRegisters(5, 300052 - OFFSET, 1);
-			Log.info("Frequency is :   "  + Log.GREEN + registers[0].getValue() + Log.ANSI_RESET);
-		} catch (ModbusException e) {
-			Log.exception(e);
+			Register[] registers = master.readMultipleRegisters(unitId, 300052 - OFFSET, 1);
+			int value = registers[0].getValue();
+			return Optional.ofNullable(value);
 		} catch (Exception e) {
-			Log.exception(e);
+			Log.error(e.getMessage());
+			return Optional.empty();
 		} finally {
-			master.disconnect();
+			if (master != null) {
+				master.disconnect();
+			}
 		}
 	}
-
-	@Override
-	public void printErrors() {		
-		// Nothing to do
-	}
-
 }

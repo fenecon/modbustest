@@ -4,29 +4,29 @@ import java.util.Optional;
 
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.procimg.Register;
-import com.ghgande.j2mod.modbus.util.BitVector;
 
 import modbustest.util.Log;
 
-public class KMTronic extends ModbusRtuDevice {
+public class Janitza extends ModbusRtuDevice {
 
-	public KMTronic(String systemportname) {
+	public Janitza(String systemportname) {
 		super(systemportname);
 	}
 
 	@Override
 	public String getName() {
-		return "FEMS Relais (KMTronic)";
+		return "Janitza UMG96";
 	}
 
 	@Override
 	public boolean detectDevice() {
 		boolean detected = false;
-		int unitId = 1;
-		Optional<String> valueOpt = readData(unitId);
-		if (valueOpt.isPresent()) {
-			Log.info("State is :   " + Log.GREEN + valueOpt.get() + Log.ANSI_RESET);
-			detected = true;
+		for (int unitId = 1; unitId < 6; unitId++) {
+			Optional<Integer> valueOpt = readData(unitId);
+			if (valueOpt.isPresent()) {
+				Log.info("Frequency is :   " + Log.GREEN + valueOpt.get() + Log.ANSI_RESET);
+				detected = true;
+			}
 		}
 		return detected;
 	}
@@ -35,25 +35,22 @@ public class KMTronic extends ModbusRtuDevice {
 	public boolean detectDevice(String id) {
 		boolean detected = false;
 		int unitId = Integer.parseInt(id);
-		Optional<String> valueOpt = readData(unitId);
+		Optional<Integer> valueOpt = readData(unitId);
 		if (valueOpt.isPresent()) {
 			Log.info("Frequency is :   " + Log.GREEN + valueOpt.get() + Log.ANSI_RESET);
 			detected = true;
 		}
 		return detected;
 	}
-	
-	private final Optional<String> readData(int unitId) {
+
+	private final Optional<Integer> readData(int unitId) {
+		Log.info(Log.HIGH_INTENSITY + Log.CYAN + "- - Trying Unit-ID [" + unitId + "]");
 		ModbusSerialMaster master = null;
 		try {
 			master = getModbusSerialMaster();
-			BitVector coils = master.readCoils(1, 0, 8);
-			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < coils.size(); i++) {
-				boolean coil = coils.getBit(i);
-				b.append(coil ? "x" : "-");
-			}
-			return Optional.of(b.toString());
+			Register[] registers = master.readMultipleRegisters(unitId, 800, 1);
+			int value = registers[0].getValue();
+			return Optional.ofNullable(value);
 		} catch (Exception e) {
 			Log.error(e.getMessage());
 			return Optional.empty();
