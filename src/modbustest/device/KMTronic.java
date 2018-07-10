@@ -10,8 +10,8 @@ import modbustest.util.Log;
 
 public class KMTronic extends ModbusRtuDevice {
 
-	public KMTronic(String systemportname) {
-		super(systemportname);
+	public KMTronic(String systemportname, Optional<String> id) {
+		super(systemportname, id);
 	}
 
 	@Override
@@ -30,19 +30,6 @@ public class KMTronic extends ModbusRtuDevice {
 		}
 		return detected;
 	}
-
-	@Override
-	public boolean detectDevice(String id) {
-		boolean detected = false;
-		int unitId = Integer.parseInt(id);
-		Optional<String> valueOpt = readData(unitId);
-		if (valueOpt.isPresent()) {
-			Log.info("Frequency is :   " + Log.GREEN + valueOpt.get() + Log.ANSI_RESET);
-			detected = true;
-		}
-		return detected;
-	}
-	
 	private final Optional<String> readData(int unitId) {
 		ModbusSerialMaster master = null;
 		try {

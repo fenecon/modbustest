@@ -1,6 +1,7 @@
 package modbustest.device;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
@@ -10,8 +11,8 @@ import modbustest.util.Log;
 
 public abstract class Mini extends ModbusRtuDevice {
 
-	public Mini(String systemportname) {
-		super(systemportname);
+	public Mini(String systemportname, Optional<String> id) {
+		super(systemportname, id);
 	}
 
 //	protected int batteryCabinet() {

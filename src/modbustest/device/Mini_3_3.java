@@ -1,9 +1,11 @@
 package modbustest.device;
 
+import java.util.Optional;
+
 public class Mini_3_3 extends Mini {
 
-	public Mini_3_3(String systemportname) {
-		super(systemportname);
+	public Mini_3_3(String systemportname, Optional<String> id) {
+		super(systemportname, id);
 	}
 
 	@Override
@@ -13,12 +15,6 @@ public class Mini_3_3 extends Mini {
 
 	@Override
 	public boolean detectDevice() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean detectDevice(String id) {
 		// TODO Auto-generated method stub
 		return false;
 	}

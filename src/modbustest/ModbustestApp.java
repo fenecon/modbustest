@@ -10,7 +10,8 @@ import com.fazecast.jSerialComm.SerialPort;
 
 import modbustest.device.CarloGavazziEM300;
 import modbustest.device.Device;
-import modbustest.device.Janitza;
+import modbustest.device.JanitzaUMG96RM;
+import modbustest.device.Socomec;
 import modbustest.util.Log;
 
 public class ModbustestApp {
@@ -79,9 +80,9 @@ public class ModbustestApp {
 
 		// create devices
 		List<Device> devices = new ArrayList<>();
-		devices.add(new CarloGavazziEM300(deviceName));
-		devices.add(new Janitza(deviceName));
-		// devices.add(new Socomec(deviceName));
+//		devices.add(new CarloGavazziEM300(deviceName, argUnitId));
+//		devices.add(new JanitzaUMG96RM(deviceName, argUnitId));
+		 devices.add(new Socomec(deviceName, argUnitId));
 		// devices.add(new KMTronic(deviceName));
 		// devices.add(new Pro(deviceName));
 		// devices.add(new Mini_3_3(deviceName));
@@ -90,14 +91,9 @@ public class ModbustestApp {
 		Log.info(Log.HIGH_INTENSITY + Log.YELLOW + "Trying [" + deviceName + "]" + Log.ANSI_RESET);
 		for (Device device : devices) {
 			Log.info(Log.HIGH_INTENSITY + Log.CYAN + "- Trying to find [" + device.getName() + "]" + Log.ANSI_RESET);
-			if(argUnitId.isPresent()) {
-				if (device.detectDevice(argUnitId.get())) {
-					Log.info("Detected " + Log.HIGH_INTENSITY + Log.GREEN + "[" + device.getName() + "]" + Log.ANSI_RESET);
-				}
-			} else {
-				if (device.detectDevice()) {
-					Log.info("Detected " + Log.HIGH_INTENSITY + Log.GREEN + "[" + device.getName() + "]" + Log.ANSI_RESET);
-				}
+			boolean detected = device.detectDevice();
+			if (detected) {
+				Log.info("Detected " + Log.HIGH_INTENSITY + Log.GREEN + "[" + device.getName() + "]" + Log.ANSI_RESET);
 			}
 		}
 	}

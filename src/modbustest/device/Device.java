@@ -6,6 +6,4 @@ public interface Device {
 
 	public boolean detectDevice();
 
-	public boolean detectDevice(String id);
-
 }

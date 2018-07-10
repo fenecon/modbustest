@@ -1,6 +1,7 @@
 package modbustest.device;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
@@ -10,8 +11,8 @@ import modbustest.util.Log;
 
 public class ProHybrid extends ModbusRtuDevice {
 
-	public ProHybrid(String systemportname) {
-		super(systemportname);
+	public ProHybrid(String systemportname, Optional<String> id) {
+		super(systemportname, id);
 	}
 
 	@Override
@@ -21,12 +22,6 @@ public class ProHybrid extends ModbusRtuDevice {
 
 	@Override
 	public boolean detectDevice() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean detectDevice(String id) {
 		// TODO Auto-generated method stub
 		return false;
 	}
