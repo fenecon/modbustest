@@ -1,4 +1,4 @@
-package modbustest.device;
+package modbustest.device.modbus.rtu;
 
 import java.util.Optional;
 

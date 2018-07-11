@@ -1,22 +1,28 @@
-package modbustest.device;
+package modbustest.device.modbus.rtu;
 
 import java.util.Optional;
 
 import com.ghgande.j2mod.modbus.facade.ModbusSerialMaster;
 import com.ghgande.j2mod.modbus.util.SerialParameters;
 
+import modbustest.device.Device;
+
 public abstract class ModbusRtuDevice implements Device {
 
 	private final static int TIMEOUT = 500;
 	private final static int RETRIES = 1; // default would be 3
 
-	protected final Optional<String> id;
+	protected final Optional<Integer> unitId;
 
 	private final String systemportname;
 
 	public ModbusRtuDevice(String systemportname, Optional<String> id) {
 		this.systemportname = systemportname;
-		this.id = id;
+		if (id.isPresent()) {
+			this.unitId = Optional.of(Integer.parseInt(id.get()));
+		} else {
+			this.unitId = Optional.empty();
+		}
 	}
 
 	protected ModbusSerialMaster getModbusSerialMaster() throws Exception {

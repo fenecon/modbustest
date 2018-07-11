@@ -1,4 +1,4 @@
-package modbustest.device;
+package modbustest.device.modbus.rtu;
 
 import java.util.Optional;
 
@@ -23,8 +23,8 @@ public class CarloGavazziEM300 extends ModbusRtuDevice {
 	@Override
 	public boolean detectDevice() {
 		boolean detected = false;
-		if (this.id.isPresent()) {
-			this.detect(Integer.parseInt(this.id.get()));
+		if (this.unitId.isPresent()) {
+			this.detect(this.unitId.get());
 
 		} else {
 			for (int unitId = 1; unitId < 6; unitId++) {
