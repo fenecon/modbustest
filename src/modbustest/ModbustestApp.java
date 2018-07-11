@@ -8,10 +8,11 @@ import java.util.stream.Collectors;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-import modbustest.device.CarloGavazziEM300;
 import modbustest.device.Device;
-import modbustest.device.JanitzaUMG96RM;
-import modbustest.device.Socomec;
+import modbustest.device.modbus.rtu.CarloGavazziEM300;
+import modbustest.device.modbus.rtu.JanitzaUMG96RM;
+import modbustest.device.modbus.rtu.Socomec;
+import modbustest.device.modbus.tcp.KMTronicTcp;
 import modbustest.util.Log;
 
 public class ModbustestApp {
@@ -20,11 +21,11 @@ public class ModbustestApp {
 
 	public static void main(String[] args) throws Exception {
 		SerialPort[] ports = SerialPort.getCommPorts();
-		Optional<String> argPortName = Optional.empty();
+		Optional<String> argBridgeName = Optional.empty();
 
 		for (String arg : args) {
-			if (arg.startsWith("-d=")) {
-				argPortName = Optional.of(arg.substring(3));
+			if (arg.startsWith("-b=")) {
+				argBridgeName = Optional.of(arg.substring(3));
 
 			} else if (arg.startsWith("-i=")) {
 				argUnitId = Optional.of(arg.substring(3));
@@ -32,7 +33,7 @@ public class ModbustestApp {
 			} else {
 				System.out.println("Available commands:");
 				System.out.println("-h           help");
-				System.out.println("-d=device    set a device, e.g. "
+				System.out.println("-b=device    set an IP address or a device, e.g. "
 						+ Arrays.stream(ports).map(p -> p.getSystemPortName()).collect(Collectors.joining(",")));
 				System.out.println("-i=id        device specific ID, e.g. Unit-ID or IP-address");
 				System.out.println("-h           help");
@@ -42,8 +43,8 @@ public class ModbustestApp {
 
 		try {
 			if (ports != null) {
-				if (argPortName.isPresent()) {
-					tryPort(argPortName.get());
+				if (argBridgeName.isPresent()) {
+					tryBridge(argBridgeName.get());
 
 				} else {
 					for (SerialPort port : ports) {
@@ -55,7 +56,7 @@ public class ModbustestApp {
 						} else if (portName.equals("ttymxc0")) {
 							continue; // ignore ttyS0
 						}
-						tryPort(portName);
+						tryBridge(portName);
 					}
 				}
 				Log.info("  ");
@@ -67,28 +68,26 @@ public class ModbustestApp {
 		}
 	}
 
-	private static void tryPort(String portName) {
+	private static void tryBridge(String bridgeName) {
 		boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
 		// get device name
-		String deviceName;
-		if (isWindows) {
-			deviceName = portName;
-		} else {
-			deviceName = "/dev/" + portName;
+		if (!isWindows) {
+			bridgeName = "/dev/" + bridgeName;
 		}
 
 		// create devices
 		List<Device> devices = new ArrayList<>();
 //		devices.add(new CarloGavazziEM300(deviceName, argUnitId));
 //		devices.add(new JanitzaUMG96RM(deviceName, argUnitId));
-		 devices.add(new Socomec(deviceName, argUnitId));
+//		 devices.add(new Socomec(deviceName, argUnitId));
+		 devices.add(new KMTronicTcp(bridgeName, argUnitId));
 		// devices.add(new KMTronic(deviceName));
 		// devices.add(new Pro(deviceName));
 		// devices.add(new Mini_3_3(deviceName));
 		// devices.add(new Mini_3_6(deviceName));
 		// devices.add(new ProHybrid(deviceName));
-		Log.info(Log.HIGH_INTENSITY + Log.YELLOW + "Trying [" + deviceName + "]" + Log.ANSI_RESET);
+		Log.info(Log.HIGH_INTENSITY + Log.YELLOW + "Trying [" + bridgeName + "]" + Log.ANSI_RESET);
 		for (Device device : devices) {
 			Log.info(Log.HIGH_INTENSITY + Log.CYAN + "- Trying to find [" + device.getName() + "]" + Log.ANSI_RESET);
 			boolean detected = device.detectDevice();
