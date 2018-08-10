@@ -12,6 +12,7 @@ import modbustest.device.Device;
 import modbustest.device.modbus.rtu.CarloGavazziEM300;
 import modbustest.device.modbus.rtu.JanitzaUMG96RM;
 import modbustest.device.modbus.rtu.Socomec;
+import modbustest.device.modbus.rtu.Soltaro;
 import modbustest.device.modbus.tcp.KMTronicTcp;
 import modbustest.util.Log;
 
@@ -87,6 +88,7 @@ public class ModbustestApp {
 		// devices.add(new Mini_3_3(deviceName));
 		// devices.add(new Mini_3_6(deviceName));
 		// devices.add(new ProHybrid(deviceName));
+		 devices.add(new Soltaro(bridgeName, Optional.empty()));
 		Log.info(Log.HIGH_INTENSITY + Log.YELLOW + "Trying [" + bridgeName + "]" + Log.ANSI_RESET);
 		for (Device device : devices) {
 			Log.info(Log.HIGH_INTENSITY + Log.CYAN + "- Trying to find [" + device.getName() + "]" + Log.ANSI_RESET);
